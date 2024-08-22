@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site B - Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <h1>Payment Page</h1>
+    <form id="payment-form">
+        <div id="card-element"><!-- Stripe's Card Element will be inserted here --></div>
+        <button id="submit">Pay</button>
+    </form>
+
+    <script>
+        const stripe = Stripe('your-publishable-key');
+
+        document.getElementById('payment-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const clientSecret = new URLSearchParams(window.location.search).get('clientSecret');
+
+            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: stripe.elements().create('card').mount('#card-element'),
+                },
+            });
+
+            if (error) {
+                console.error(error);
+                alert('Payment failed: ' + error.message);
+            } else if (paymentIntent.status === 'succeeded') {
+                alert('Payment successful!');
+                // Redirect back to Site A with payment status
+                fetch('http://localhost:3000/update-order-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId: paymentIntent.id, status: 'paid' }),
+                })
+                .then(() => {
+                    window.location.href = 'http://localhost:3000/order-confirmation';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site A - Shopping</title>
+</head>
+<body>
+    <h1>Shopping Page</h1>
+    <div id="products">
+        <div>
+            <h3>Product 1</h3>
+            <button onclick="addToCart('Product 1')">Add to Cart</button>
+        </div>
+        <div>
+            <h3>Product 2</h3>
+            <button onclick="addToCart('Product 2')">Add to Cart</button>
+        </div>
+    </div>
+    <hr>
+    <button onclick="checkout()">Checkout</button>
+
+    <script>
+        const cart = [];
+
+        function addToCart(product) {
+            cart.push(product);
+            alert(product + ' added to cart!');
+        }
+
+        function checkout() {
+            fetch('frontend code\backend code\payment.html', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cart, token: 'secureToken' }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                window.location.href = data.redirectUrl;
+            });
+        }
+    </script>
+</body>
+</html>
